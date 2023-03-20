@@ -124,6 +124,7 @@ class ExtraNetworksPage:
         if onclick is None:
             onclick = '"' + html.escape(f"""return cardClicked({json.dumps(tabname)}, {item["prompt"]}, {"true" if self.allow_negative_prompt else "false"})""") + '"'
 
+        onhover = "''"
         metadata_button = ""
         metadata = item.get("metadata")
         if metadata:
@@ -138,6 +139,7 @@ class ExtraNetworksPage:
             "name": item["name"],
             "description": (item.get("description") or ""),
             "card_clicked": onclick,
+            "card_hover": onhover,
             "save_card_preview": '"' + html.escape(f"""return saveCardPreview(event, {json.dumps(tabname)}, {json.dumps(item["local_preview"])})""") + '"',
             "search_term": item.get("search_term", ""),
             "metadata_button": metadata_button,

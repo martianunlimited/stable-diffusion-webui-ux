@@ -1365,10 +1365,6 @@ function selectCheckpoint(name){
     gradioApp().getElementById('change_checkpoint').click()
 }
 
-function previewExtraNetwork(elem,preview) {
-	img=elem.style.backgroundImage;
-	gradioApp().getElementById(preview).style.backgroundImage=img;
-}
 
 document.addEventListener('readystatechange', function (e) {		
 	document.body.style.display = "none";

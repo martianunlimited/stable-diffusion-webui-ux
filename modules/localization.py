@@ -21,7 +21,7 @@ def list_localizations(dirname):
     for file in scripts.list_scripts("localizations", ".json"):
         fn, ext = os.path.splitext(file.filename)
         localizations[fn] = file.path
-
+    return localizations
 
 def localization_js(current_localization_name):
     fn = localizations.get(current_localization_name, None)
