@@ -325,6 +325,9 @@ def prepare_environment():
         requirements_file = os.path.join(script_path, requirements_file)
     run_pip(f"install -r \"{requirements_file}\"", "requirements for Web UI")
 
+    if "--exit" in sys.argv:
+        exit(0)
+        
     run_extensions_installers(settings_file=args.ui_settings_file)
 
     if update_check:
@@ -333,10 +336,6 @@ def prepare_environment():
     if update_all_extensions:
         git_pull_recursive(os.path.join(data_path, dir_extensions))
     
-    if "--exit" in sys.argv:
-        print("Exiting because of --exit argument")
-        exit(0)
-
     if run_tests:
         exitcode = tests(test_dir)
         exit(exitcode)

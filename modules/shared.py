@@ -308,7 +308,6 @@ def list_samplers():
     return modules.sd_samplers.all_samplers
 
 
-
 hide_dirs = {"visible": not cmd_opts.hide_ui_dir_config}
 tab_names = []
 
