@@ -165,6 +165,7 @@ class ExtraNetworksPage:
         args = {
             #"style": f"'{height}{width}{background_image}'",
             "preview_html": "style='background-image: url(\"" + html.escape(preview) + "\")'" if preview else '',
+            "preview_image": html.escape(preview) if preview else './file=html/card-no-preview.png',
             "prompt": item.get("prompt", None),
             "tabname": json.dumps(tabname),
             "local_preview": json.dumps(item["local_preview"]),
@@ -251,10 +252,10 @@ def create_ui(container, button, tabname):
         
         with gr.Tabs(elem_id=tabname+"_extra_tabs") as tabs:
             for page in ui.stored_extra_pages:
-                with gr.Tab(page.title):
-
+                with gr.Tab(page.title, id=page.title.lower().replace(" ", "_")):
                     page_elem = gr.HTML(page.create_html(ui.tabname))
                     ui.pages.append(page_elem)
+
 
         filter = gr.Textbox('', show_label=False, elem_id=tabname+"_extra_search", placeholder="Search...", visible=False)       
         button_refresh = ToolButton(value=refresh_symbol, elem_id=tabname+"_extra_refresh")

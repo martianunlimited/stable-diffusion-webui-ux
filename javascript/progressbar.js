@@ -1,16 +1,15 @@
 // code related to showing and updating progressbar shown as the image is being made
 
-function rememberGallerySelection(id_gallery){
+function rememberGallerySelection(){
 
 }
 
-function getGallerySelectedIndex(id_gallery){
+function getGallerySelectedIndex(){
 
 }
 
 function request(url, data, handler, errorHandler){
     var xhr = new XMLHttpRequest();
-    var url = url;
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
@@ -66,7 +65,7 @@ function randomId(){
 // starts sending progress requests to "/internal/progress" uri, creating progressbar above progressbarContainer element and
 // preview inside gallery element. Cleans up all created stuff when the task is over and calls atEnd.
 // calls onProgress every time there is a progress update
-function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgress){
+function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgress, inactivityTimeout=40){
     var dateStart = new Date()
     var wasEverActive = false
     var parentProgressbar = progressbarContainer.parentNode
@@ -74,7 +73,8 @@ function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgre
 
     var divProgress = document.createElement('div')
     divProgress.className='progressDiv'
-    divProgress.style.display = opts.show_progressbar ? "block" : "none"
+
+	divProgress.style.display = opts.show_progressbar ? "block" : "none"
     var divInner = document.createElement('div')
     divInner.className='progress'
 
@@ -105,6 +105,9 @@ function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgre
 		if(livePreview){
 			if(parentGallery) parentGallery.removeChild(livePreview)
 		}
+		gradioApp().querySelectorAll('#tabs + div, #tabs + div > *:not(ul)').forEach(function (elem){
+			elem.style.setProperty("display", "block", "important");
+		})
 		atEnd()
     }
 
@@ -121,7 +124,7 @@ function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgre
                 divProgress.style.width = rect.width + "px";
             }
 
-            progressText = ""
+            let progressText = ""
 
             divInner.style.width = ((res.progress || 0) * 100.0) + '%'
             divInner.style.background = res.progress ? "" : "transparent"
@@ -152,7 +155,7 @@ function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgre
                 return
             }
 
-            if(elapsedFromStart > 5 && !res.queued && !res.active){
+            if(elapsedFromStart > inactivityTimeout && !res.queued && !res.active){
                 removeProgressBar()
                 return
             }
@@ -177,6 +180,7 @@ function requestProgress(id_task, progressbarContainer, gallery, atEnd, onProgre
                     }
                 }
                 img.src = res.live_preview;
+				
             }
 
 

@@ -284,6 +284,10 @@ Steps: 20, Sampler: Euler a, CFG scale: 7, Seed: 965400086, Size: 512x512, Model
 
     restore_old_hires_fix_params(res)
 
+    # Missing RNG means the default was set, which is GPU RNG
+    if "RNG" not in res:
+        res["RNG"] = "GPU"
+
     return res
 
 
@@ -304,6 +308,8 @@ infotext_to_setting_name_mapping = [
     ('UniPC skip type', 'uni_pc_skip_type'),
     ('UniPC order', 'uni_pc_order'),
     ('UniPC lower order final', 'uni_pc_lower_order_final'),
+    ('RNG', 'randn_source'),
+    ('NGMS', 's_min_uncond'),
 ]
 
 
@@ -381,7 +387,7 @@ def connect_paste(button, paste_fields, input_comp, override_settings_component,
                 v = params.get(param_name, None)
                 if v is None:
                     continue
-
+                
                 if setting_name == "sd_model_checkpoint" and shared.opts.disable_weights_auto_swap:
                     continue
 
@@ -391,7 +397,7 @@ def connect_paste(button, paste_fields, input_comp, override_settings_component,
                 if v == current_value:
                     continue
 
-                vals[param_name] = v
+                vals[param_name] = v              
 
             vals_pairs = [f"{k}: {v}" for k, v in vals.items()]
 
