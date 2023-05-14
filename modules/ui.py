@@ -105,7 +105,7 @@ def visit(x, func, path=""):
         for c in x.children:
             visit(c, func, path)
     elif x.label is not None:
-        func(path + "/" + str(x.label), x)
+        func(f"{path}/{x.label}", x)
 
 
 def add_style(name: str, prompt: str, negative_prompt: str):
@@ -132,7 +132,7 @@ def calc_resolution_hires(enable, width, height, hr_scale, hr_resize_x, hr_resiz
     with devices.autocast():
         p.init([""], [0], [0])
 
-    return f"resize: from <span class='resolution'>{p.width}x{p.height}</span> to <span class='resolution'>{p.hr_resize_x or p.hr_upscale_to_x}x{p.hr_resize_y or p.hr_upscale_to_y}</span>"
+    return f"from <span class='resolution'>{p.width}x{p.height}</span> to <span class='resolution'>{p.hr_resize_x or p.hr_upscale_to_x}x{p.hr_resize_y or p.hr_upscale_to_y}</span>"
 
 
 def resize_from_to_html(width, height, scale_by):
@@ -142,7 +142,7 @@ def resize_from_to_html(width, height, scale_by):
     if not target_width or not target_height:
         return "no image selected"
 
-    return f"resize: from <span class='resolution'>{width}x{height}</span> to <span class='resolution'>{target_width}x{target_height}</span>"
+    return f"from <span class='resolution'>{width}x{height}</span> to <span class='resolution'>{target_width}x{target_height}</span>"
 
 
 def apply_styles(prompt, prompt_neg, styles):
@@ -170,7 +170,7 @@ def process_interrogate(interrogation_function, mode, ii_input_dir, ii_output_di
             img = Image.open(image)
             filename = os.path.basename(image)
             left, _ = os.path.splitext(filename)
-            print(interrogation_function(img), file=open(os.path.join(ii_output_dir, left + ".txt"), 'a'))
+            print(interrogation_function(img), file=open(os.path.join(ii_output_dir, f"{left}.txt"), 'a'))
 
         return [gr.update(), None]
 
@@ -198,8 +198,10 @@ def create_seed_inputs(target_interface):
             seed_checkbox = gr.Checkbox(label='Extra', elem_id=target_interface + '_subseed_show', value=False)
              
 
+
     # Components to show/hide based on the 'Extra' checkbox
     seed_extras = []
+
 
 
     # use sub-group
@@ -523,9 +525,7 @@ def create_ui():
                                 res_switch_btn = ToolButton(value=switch_values_symbol, elem_id="txt2img_res_switch_btn")
                                 height = gr.Slider(minimum=64, maximum=2048, step=8, label="Height", value=512, elem_id="txt2img_height")
 
-
-                            if opts.dimensions_and_batch_together:
-                            
+                            if opts.dimensions_and_batch_together:                           
                                 with gr.Row(elem_id="txt2img_column_batch"):
                                     batch_count = gr.Slider(minimum=1, step=1, label='Batch count', value=1, elem_id="txt2img_batch_count")
                                     batch_size = gr.Slider(minimum=1, maximum=8, step=1, label='Batch size', value=1, elem_id="txt2img_batch_size")
@@ -538,7 +538,7 @@ def create_ui():
 
                         elif category == "checkboxes":
                             #with FormRow(elem_id="txt2img_checkboxes", variant="compact"):
-                            with gr.Row():
+                            with gr.Row(elem_id="txt2img_checkboxes"):
                                 restore_faces = gr.Checkbox(label='Restore faces', value=False, visible=len(shared.face_restorers) > 1, elem_id="txt2img_restore_faces")
                                 tiling = gr.Checkbox(label='Tiling', value=False, elem_id="txt2img_tiling")
                                 enable_hr = gr.Checkbox(label='Hires. fix', value=False, elem_id="txt2img_enable_hr")
@@ -562,7 +562,7 @@ def create_ui():
                         elif category == "batch":
                             if not opts.dimensions_and_batch_together:
                                 #with FormRow(elem_id="txt2img_column_batch"):
-                                with gr.Row():
+                                with gr.Row(elem_id="txt2img_column_batch"):
                                     batch_count = gr.Slider(minimum=1, step=1, label='Batch count', value=1, elem_id="txt2img_batch_count")
                                     batch_size = gr.Slider(minimum=1, maximum=8, step=1, label='Batch size', value=1, elem_id="txt2img_batch_size")
              
@@ -896,8 +896,6 @@ def create_ui():
                             outputs=[],
                         )
 
-                    #with FormRow():
-                    #    resize_mode = gr.Dropdown(label="Resize mode", elem_id="resize_mode", choices=["Just resize", "Crop and resize", "Resize and fill", "Just resize (latent upscale)"], type="index", value="Just resize")
 
                     for category in ordered_ui_categories():
                         if category == "sampler":
@@ -932,9 +930,11 @@ def create_ui():
                                     batch_count = gr.Slider(minimum=1, step=1, label='Batch count', value=1, elem_id="img2img_batch_count")
                                     batch_size = gr.Slider(minimum=1, maximum=8, step=1, label='Batch size', value=1, elem_id="img2img_batch_size")
 
+
                         elif category == "override_settings":
                             with gr.Row(elem_id="img2img_override_settings_row") as row:
                                 override_settings = create_override_settings_dropdown('img2img', row)
+
 
                         elif category == "scripts":
                             #with FormGroup(elem_id="img2img_script_container"):
@@ -1548,9 +1548,9 @@ def create_ui():
         elif t == bool:
             comp = gr.Checkbox
         else:
-            raise Exception(f'bad options item type: {str(t)} for key {key}')
+            raise Exception(f'bad options item type: {t} for key {key}')
 
-        elem_id = "setting_"+key
+        elem_id = f"setting_{key}"
 
         if info.refresh is not None:
             if is_quicksettings:
@@ -1570,6 +1570,7 @@ def create_ui():
                             create_refresh_button(res, info.refresh, info.component_args, "refresh_" + key)
                     with gr.Row():           
                         gr.Checkbox(label='', elem_id=f'{section}_add2quick_{elem_id}', value=False, interactive=True)
+
         else:
             with gr.Row(elem_id=f'row_{elem_id}'):
                 res = comp(label=info.label, value=fun(), elem_id=elem_id, **(args or {}))
@@ -1623,7 +1624,7 @@ def create_ui():
 
         result = gr.HTML(elem_id="settings_result")
 
-        quicksettings_names = [x.strip() for x in opts.quicksettings.split(",")]
+        quicksettings_names = opts.quicksettings_list
         quicksettings_names = {x: i for i, x in enumerate(quicksettings_names) if x != 'quicksettings'}
 
         quicksettings_list = []
@@ -1643,7 +1644,7 @@ def create_ui():
                         current_tab.__exit__()                       
 
                     gr.Group()
-                    current_tab = gr.TabItem(elem_id="settings_{}".format(elem_id), label=text)
+                    current_tab = gr.TabItem(elem_id=f"settings_{elem_id}", label=text)
                     current_tab.__enter__()
                     current_row = gr.Column(variant='panel', elem_id="{}_settings_2img_settings".format(elem_id))
                     current_row.__enter__()
@@ -1664,7 +1665,7 @@ def create_ui():
                 current_row.__exit__()
                 current_tab.__exit__()
 
-            with gr.TabItem("Actions", id="actions"):
+            with gr.TabItem("Actions", id="actions", elem_id="settings_tab_actions"):
                 request_notifications = gr.Button(value='Request browser notifications', elem_id="request_notifications")
                 download_localization = gr.Button(value='Download localization template', elem_id="download_localization")
                 reload_script_bodies = gr.Button(value='Reload custom script bodies (No ui updates, No restart)', variant='secondary', elem_id="settings_reload_script_bodies")
@@ -1672,7 +1673,7 @@ def create_ui():
                     unload_sd_model = gr.Button(value='Unload SD checkpoint to free VRAM', elem_id="sett_unload_sd_model")
                     reload_sd_model = gr.Button(value='Reload the last SD checkpoint back into VRAM', elem_id="sett_reload_sd_model")
 
-            with gr.TabItem("Licenses", id="licenses"):
+            with gr.TabItem("Licenses", id="licenses", elem_id="settings_tab_licenses"):
                 gr.HTML(shared.html("licenses.html"), elem_id="licenses")
 
             gr.Button(value="Show all pages", elem_id="settings_show_all_pages")
@@ -1794,7 +1795,7 @@ def create_ui():
  
         with gr.Tabs(elem_id="tabs") as tabs:
             for interface, label, ifid in interfaces:
-                with gr.TabItem(label, id=ifid, elem_id='tab_' + ifid):
+                with gr.TabItem(label, id=ifid, elem_id=f"tab_{ifid}"):
                     interface.render()
 
         if os.path.exists(os.path.join(script_path, "notification.mp3")):
@@ -1823,11 +1824,9 @@ def create_ui():
                 show_progress=info.refresh is not None,
             )
 
-        text_settings.change(
-            fn=lambda: gr.update(visible=shared.sd_model and shared.sd_model.cond_stage_key == "edit"),
-            inputs=[],
-            outputs=[image_cfg_scale],
-        )
+        update_image_cfg_scale_visibility = lambda: gr.update(visible=shared.sd_model and shared.sd_model.cond_stage_key == "edit")
+        text_settings.change(fn=update_image_cfg_scale_visibility, inputs=[], outputs=[image_cfg_scale])
+        demo.load(fn=update_image_cfg_scale_visibility, inputs=[], outputs=[image_cfg_scale])
 
         button_set_checkpoint = gr.Button('Change checkpoint', elem_id='change_checkpoint', visible=False)
         button_set_checkpoint.click(
@@ -1909,10 +1908,10 @@ def create_ui():
 
     def loadsave(path, x):
         def apply_field(obj, field, condition=None, init_field=None):
-            key = path + "/" + field
+            key = f"{path}/{field}"
 
             if getattr(obj, 'custom_script_source', None) is not None:
-              key = 'customscript/' + obj.custom_script_source + '/' + key
+              key = f"customscript/{obj.custom_script_source}/{key}"
 
             if getattr(obj, 'do_not_save_to_config', False):
                 return
@@ -2061,7 +2060,7 @@ def versions_html():
 
     python_version = ".".join([str(x) for x in sys.version_info[0:3]])
     commit = launch.commit_hash()
-    short_commit = commit[0:8]
+    tag = launch.git_tag()
 
     if shared.xformers_available:
         import xformers
@@ -2076,7 +2075,23 @@ def versions_html():
 <li><span>torch: </span>  {getattr(torch, '__long_version__',torch.__version__)}</li>
 <li><span>xformers: </span> {xformers_version}</li>
 <li><span>gradio: </span> {gr.__version__}</li>
-<li><span>commit: <a href="https://github.com/anapnoe/stable-diffusion-webui-ux/commit/{commit}"></span>{short_commit}</a></li>
+<li><span>commit: <a href="https://github.com/anapnoe/stable-diffusion-webui-ux/commit/{commit}"></span>{tag}</a></li>
 <li><span>checkpoint: </span><a id="sd_checkpoint_hash">N/A</a></li>
 </ul>
 """
+
+def setup_ui_api(app):
+    from pydantic import BaseModel, Field
+    from typing import List
+
+    class QuicksettingsHint(BaseModel):
+        name: str = Field(title="Name of the quicksettings field")
+        label: str = Field(title="Label of the quicksettings field")
+
+    def quicksettings_hint():
+        return [QuicksettingsHint(name=k, label=v.label) for k, v in opts.data_labels.items()]
+
+    app.add_api_route("/internal/quicksettings-hint", quicksettings_hint, methods=["GET"], response_model=List[QuicksettingsHint])
+
+    app.add_api_route("/internal/ping", lambda: {}, methods=["GET"])
+
