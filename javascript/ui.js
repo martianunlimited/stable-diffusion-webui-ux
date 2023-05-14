@@ -869,9 +869,7 @@ onUiUpdate(function(){
 	const tabitems = gradioApp().querySelectorAll('#tabs > div.tabitem');	
 	
 	function tabOpsSave(setting){
-		const iEvent = new Event("input");		
-		Object.defineProperty(iEvent, "target", {value: setting})		
-		setting.dispatchEvent(iEvent);
+		updateInput(setting);
 	}
 	
 	function tabsHiddenChange() {		
@@ -1024,9 +1022,7 @@ onUiUpdate(function(){
 	const quick_parent = gradioApp().querySelector("#quicksettings_overflow_container");
 	const setting_quicksettings = gradioApp().querySelector('#setting_quicksettings textarea');
 	function saveQuickSettings(){
-		const iEvent = new Event("input");		
-		Object.defineProperty(iEvent, "target", {value: setting_quicksettings})		
-		setting_quicksettings.dispatchEvent(iEvent);		
+		updateInput(setting_quicksettings);		
 		const cEvent = new Event("click");//submit	
 		Object.defineProperty(cEvent, "target", {value: settings_submit})		
 		settings_submit.dispatchEvent(cEvent);
@@ -1129,19 +1125,34 @@ onUiUpdate(function(){
 			})
 			clone_range.addEventListener('change', function (e) {
 				elem.value = clone_range.value;
-				updateInput(elem);	
+				updateInput(elem);
 			})				
 			clone_num.addEventListener('input', function (e) {								
 				clone_range.value = e.target.value;	
 			})
+			
 			const rect = clone_range.getBoundingClientRect();
 			const xoffset = (rect.left + window.scrollX);
-			clone_range.addEventListener('touchmove', function(e) {
-				e.preventDefault();				
-				let percent = parseInt(((e.touches[0].pageX - xoffset) / this.offsetWidth) * 10000) / 10000;				
-				clone_range.value = ( percent * (this.max - this.min)) + parseFloat(this.min);				
-				clone_num.value = clone_range.value;
-			});			
+			const yoffset_min = (rect.top + window.scrollY);
+			const yoffset_max = (rect.bottom + window.scrollY);
+			let drag_clone_range = false;
+			clone_range.addEventListener('touchmove', function(e) {						
+				if(	drag_clone_range){			
+					let percent = parseInt(((e.touches[0].pageX - xoffset) / this.offsetWidth) * 10000) / 10000;				
+					clone_range.value = ( percent * (this.max - this.min)) + parseFloat(this.min);				
+					clone_num.value = clone_range.value;
+				}
+			}, {passive: true})
+			clone_range.addEventListener('touchstart', function(e) {							
+				if(	e.touches[0].pageY > yoffset_min && e.touches[0].pageY < yoffset_max){			
+					drag_clone_range = true;
+				}
+			}, {passive: true})
+			clone_range.addEventListener('touchend', function(e) {				
+				drag_clone_range = false;
+			}, {passive: true})
+
+					
 		}				
 	}
 	function ui_input_focus_handler(e){
@@ -1419,9 +1430,7 @@ onUiUpdate(function(){
 			//console.log(order_settings);
 			const setting_quicksettings = gradioApp().querySelector('#setting_quicksettings textarea');
 			setting_quicksettings.value = order_settings;
-			const iEvent = new Event("input");		
-			Object.defineProperty(iEvent, "target", {value: setting_quicksettings})		
-			setting_quicksettings.dispatchEvent(iEvent);
+			updateInput(setting_quicksettings);
 			
 			const cEvent = new Event("click");//submit	
 			Object.defineProperty(cEvent, "target", {value: settings_submit})		
@@ -1598,9 +1607,12 @@ function restart_reload(){
 // Simulate an `input` DOM event for Gradio Textbox component. Needed after you edit its contents in javascript, otherwise your edits
 // will only visible on web page and not sent to python.
 function updateInput(target){
-	let e = new Event("input", { bubbles: true })
+	const e = new Event("input", { bubbles: true })
 	Object.defineProperty(e, "target", {value: target})
 	target.dispatchEvent(e);
+	const eb = new Event("blur");		
+	Object.defineProperty(eb, "target", {value: target})		
+	target.dispatchEvent(eb);	
 }
 
 var desiredCheckpointName = null;
@@ -1617,8 +1629,7 @@ function currentImg2imgSourceResolution(_, _, scaleBy){
 function updateImg2imgResizeToTextAfterChangingImage(){
     // At the time this is called from gradio, the image has no yet been replaced.
     // There may be a better solution, but this is simple and straightforward so I'm going with it.
-
-    setTimeout(function() {
+	setTimeout(function() {		
         gradioApp().getElementById('img2img_update_resize_to').click()
     }, 500);
 

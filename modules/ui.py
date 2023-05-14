@@ -300,7 +300,7 @@ def update_token_counter(text, steps):
 def create_generate(is_img2img):
     id_part = "img2img" if is_img2img else "txt2img"
                                                     
-    with gr.Column(scale=1):                      
+    with gr.Column():                      
         with gr.Row(elem_id=f"{id_part}_generate_box", elem_classes="generate-box"):                                                       
             interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt", elem_classes="generate-box-interrupt")
             skip = gr.Button('Skip', elem_id=f"{id_part}_skip", elem_classes="generate-box-skip")            
@@ -324,9 +324,9 @@ def create_toprow(is_img2img):
     id_part = "img2img" if is_img2img else "txt2img"
 
     with gr.Row(elem_id=f"{id_part}_toprow-collapse", variant="compact"):
-        with gr.Column(scale=6):
+        with gr.Column():
             with gr.Row():
-                with gr.Column(scale=80):
+                with gr.Column():
                     with gr.Column(elem_id=f"{id_part}_styles_row"):                  
                         prompt_styles = gr.Dropdown(label="Styles", elem_id=f"{id_part}_styles", choices=[k for k, v in shared.prompt_styles.styles.items()], value=[], multiselect=True)
                         create_refresh_button(prompt_styles, shared.prompt_styles.reload, lambda: {"choices": [k for k, v in shared.prompt_styles.styles.items()]}, f"refresh_{id_part}_style_index")
@@ -493,7 +493,7 @@ def create_ui():
         dummy_component = gr.Label(visible=False)
         txt_prompt_img = gr.File(label="", elem_id="txt2img_prompt_image", file_count="single", type="binary", visible=False)
 
-        with gr.Row().style(equal_height=False):
+        with gr.Row():
             txt2img_gallery, generation_info, html_info, html_log = create_output_panel("txt2img", opts.outdir_txt2img_samples)
             gr.Row(elem_id="txt2img_splitter")
             
@@ -517,7 +517,7 @@ def create_ui():
                             steps, sampler_index = create_sampler_and_steps_selection(samplers, "txt2img")
 
                         elif category == "dimensions":
-                            with gr.Row(elem_id="txt2img_dimensions_row", scale=1, elem_classes="dimensions-tools"):                          
+                            with gr.Row(elem_id="txt2img_dimensions_row", elem_classes="dimensions-tools"):                          
                                                                                    
                                 width = gr.Slider(minimum=64, maximum=2048, step=8, label="Width", value=512, elem_id="txt2img_width")
                                 res_switch_btn = ToolButton(value=switch_values_symbol, elem_id="txt2img_res_switch_btn")
@@ -721,7 +721,7 @@ def create_ui():
 
         img2img_prompt_img = gr.File(label="", elem_id="img2img_prompt_image", file_count="single", type="binary", visible=False)
 
-        with gr.Row().style(equal_height=False):
+        with gr.Row():
         
             img2img_gallery, generation_info, html_info, html_log = create_output_panel("img2img", opts.outdir_img2img_samples)
             gr.Row(elem_id="img2img_splitter")
@@ -815,14 +815,14 @@ def create_ui():
                                             resize_mode = gr.Dropdown(label="Resize mode", elem_id="resize_mode", choices=["Just resize", "Crop and resize", "Resize and fill", "Just resize (latent upscale)"], type="index", value="Just resize")
 
                                         #with gr.Row():
-                                            #with gr.Column(elem_id="img2img_column_size", scale=4):
+                                            #with gr.Column(elem_id="img2img_column_size"):
                                             # width = gr.Slider(minimum=64, maximum=2048, step=8, label="Width", value=512, elem_id="img2img_width")                         
                                             # res_switch_btn = ToolButton(value=switch_values_symbol, elem_id="img2img_res_switch_btn")
                                             # height = gr.Slider(minimum=64, maximum=2048, step=8, label="Height", value=512, elem_id="img2img_height")
-                                            #with gr.Column(elem_id="img2img_column_size", scale=4):
+                                            #with gr.Column(elem_id="img2img_column_size"):
                                         selected_scale_tab = gr.State(value=0)
 
-                                        with gr.Tabs():
+                                        with gr.Tabs(elem_id="scale_tabs"):
                                             with gr.Tab(label="Resize to") as tab_scale_to:
                                                 with gr.Row():                                                      
                                                     width = gr.Slider(minimum=64, maximum=2048, step=8, label="Width", value=512, elem_id="img2img_width")
@@ -847,7 +847,7 @@ def create_ui():
                                             scale_by.release(**on_change_args)
                                             button_update_resize_to.click(**on_change_args)
 
-                                            for component in img2img_image_inputs:
+                                            for component in [init_img, sketch]:
                                                 component.change(fn=lambda: None, _js="updateImg2imgResizeToTextAfterChangingImage", inputs=[], outputs=[], show_progress=False)
 
                                     tab_scale_to.select(fn=lambda: 0, inputs=[], outputs=[selected_scale_tab])
@@ -1200,7 +1200,7 @@ def create_ui():
         with gr.Row(): 
             with gr.Column(elem_id="ti_2img_results"):              
                 with gr.Column(elem_id='ti_gallery_container'):                                 
-                    ti_gallery = gr.Gallery(label='Output', show_label=False, elem_id='ti_gallery').style(grid=4)                   
+                    ti_gallery = gr.Gallery(label='Output', show_label=False, elem_id='ti_gallery').style(columns=4)                   
                     ti_progress = gr.HTML(elem_id="ti_progress", value="")
                     ti_outcome = gr.HTML(elem_id="ti_error", value="") 
                     ti_output = gr.Text(elem_id="ti_output", value="", show_label=False)
@@ -1616,7 +1616,7 @@ def create_ui():
 
     with gr.Blocks(analytics_enabled=False) as settings_interface:
         with gr.Row():
-            with gr.Column(scale=6):
+            with gr.Column():
                 settings_submit = gr.Button(value="Apply settings", variant='primary', elem_id="settings_submit")
             with gr.Column():
                 restart_gradio = gr.Button(value='Reload UI', variant='primary', elem_id="settings_restart_gradio")
