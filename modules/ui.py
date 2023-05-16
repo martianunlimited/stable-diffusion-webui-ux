@@ -1624,7 +1624,8 @@ def create_ui():
 
         result = gr.HTML(elem_id="settings_result")
 
-        quicksettings_names = opts.quicksettings_list
+        #quicksettings_names = opts.quicksettings_list
+        quicksettings_names = [x.strip() for x in opts.quicksettings.split(",")]
         quicksettings_names = {x: i for i, x in enumerate(quicksettings_names) if x != 'quicksettings'}
 
         quicksettings_list = []
@@ -1678,7 +1679,6 @@ def create_ui():
 
             gr.Button(value="Show all pages", elem_id="settings_show_all_pages")
             
-
         def unload_sd_weights():
             modules.sd_models.unload_model_weights()
 
@@ -2000,12 +2000,11 @@ def webpath(fn):
 
 
 def javascript_html():
-    script_js = os.path.join(script_path, "script.js")
-    head = f'<script type="text/javascript" src="{webpath(script_js)}"></script>\n'
+    # Ensure localization is in `window` before scripts
+    head = f'<script type="text/javascript">{localization.localization_js(shared.opts.localization)}</script>\n'
 
-    inline = f"{localization.localization_js(shared.opts.localization)};"
-    if cmd_opts.theme is not None:
-        inline += f"set_theme('{cmd_opts.theme}');"
+    script_js = os.path.join(script_path, "script.js")
+    head += f'<script type="text/javascript" src="{webpath(script_js)}"></script>\n'
 
     for script in modules.scripts.list_scripts("javascript", ".js"):
         head += f'<script type="text/javascript" src="{webpath(script.path)}"></script>\n'
@@ -2013,7 +2012,8 @@ def javascript_html():
     for script in modules.scripts.list_scripts("javascript", ".mjs"):
         head += f'<script type="module" src="{webpath(script.path)}"></script>\n'
 
-    head += f'<script type="text/javascript">{inline}</script>\n'
+    if cmd_opts.theme:
+        head += f'<script type="text/javascript">set_theme(\"{cmd_opts.theme}\");</script>\n'
 
     return head
 

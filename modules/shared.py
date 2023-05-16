@@ -415,6 +415,7 @@ options_templates.update(options_section(('ui', "User interface"), {
     "keyedit_precision_extra": OptionInfo(0.05, "Ctrl+up/down precision when editing <extra networks:0.9>", gr.Slider, {"minimum": 0.01, "maximum": 0.2, "step": 0.001}),
     "keyedit_delimiters": OptionInfo(".,\\/!?%^*;:{}=`~()", "Ctrl+up/down word delimiters"),
     "quicksettings_list": OptionInfo(["sd_model_checkpoint"], "Quicksettings list", ui_components.DropdownMulti, lambda: {"choices": list(opts.data_labels.keys())}),
+    "quicksettings": OptionInfo("sd_model_checkpoint", "Quicksettings"),
     "hidden_tabs": OptionInfo([], "Hidden UI tabs (requires restart)", ui_components.DropdownMulti, lambda: {"choices": [x for x in tab_names]}),
     "ui_reorder": OptionInfo(", ".join(ui_reorder_categories), "txt2img/img2img UI item order"),
     "ui_hidden_tabs": OptionInfo("", "Hidden Tabs"),
@@ -687,14 +688,19 @@ def reload_gradio_theme(theme_name=None):
     if not theme_name:
         theme_name = opts.gradio_theme
 
+    default_theme_args = dict(
+        font=["Source Sans Pro", 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        font_mono=['IBM Plex Mono', 'ui-monospace', 'Consolas', 'monospace'],
+    )
+
     if theme_name == "Default":
-        gradio_theme = gr.themes.Default()
+        gradio_theme = gr.themes.Default(**default_theme_args)
     else:
         try:
             gradio_theme = gr.themes.ThemeClass.from_hub(theme_name)
         except Exception as e:
             errors.display(e, "changing gradio theme")
-            gradio_theme = gr.themes.Default()
+            gradio_theme = gr.themes.Default(**default_theme_args)
 
 
 
