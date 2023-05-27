@@ -31,13 +31,16 @@ def fetch_file(filename: str = ""):
     if not any([Path(x).absolute() in Path(filename).absolute().parents for x in allowed_dirs]):
         raise ValueError(f"File cannot be fetched: {filename}. Must be in one of directories registered by extra pages.")
 
-    ext = os.path.splitext(filename)[1].lower()
+    ext = os.path.splitext(filename)[1]
+    if ext:
+        ext = ext.lower()
+
     if ext not in (".png", ".jpg", ".webp"):
         raise ValueError(f"File cannot be fetched: {filename}. Only png and jpg and webp.")
 
     # would profit from returning 304
     return FileResponse(filename, headers={"Accept-Ranges": "bytes"})
-
+    
 
 def get_metadata(page: str = "", item: str = ""):
     from starlette.responses import JSONResponse
@@ -83,6 +86,7 @@ class ExtraNetworksPage:
                 return abspath[len(parentdir):].replace('\\', '/')
 
         return ""
+        
 
     def create_html(self, tabname):
         view = "cards" #shared.opts.extra_networks_default_view
@@ -92,7 +96,7 @@ class ExtraNetworksPage:
 
         subdirs = {}
         for parentdir in [os.path.abspath(x) for x in self.allowed_directories_for_previews()]:
-            for root, dirs, files in os.walk(parentdir):
+            for root, dirs, files in os.walk(parentdir, followlinks=True):
                 for dirname in dirs:
                     x = os.path.join(root, dirname)
 
@@ -111,6 +115,7 @@ class ExtraNetworksPage:
 
         if subdirs:
             subdirs = {"": 1, **subdirs}
+            
 
 #<option value='{html.escape(subdir if subdir!="" else "all")}'>{html.escape(subdir if subdir!="" else "all")}</option>
         subdirs_html = "".join([f"""
@@ -169,9 +174,9 @@ class ExtraNetworksPage:
 
         local_path = ""
         filename = item.get("filename", "")
-        for reldir in self.allowed_directories_for_previews():
-            absdir = os.path.abspath(reldir)
 
+        for reldir in self.allowed_directories_for_previews():
+            absdir = os.path.abspath(reldir)        
             if filename.startswith(absdir):
                 local_path = filename[len(absdir):]
 
@@ -206,10 +211,16 @@ class ExtraNetworksPage:
         if shared.opts.samples_format not in preview_extensions:
             preview_extensions.append(shared.opts.samples_format)
 
-        file_name = os.path.basename(path)
-        location = os.path.dirname(path)
-        preview_path = location + "/preview/" + file_name
-        potential_files = sum([[path + "." + ext, path + ".preview." + ext, preview_path + "." + ext, preview_path + ".preview." + ext] for ext in preview_extensions], [])
+        # file_name = os.path.basename(path)
+        # location = os.path.dirname(path)            
+        # preview_path = location + "/preview/" + file_name
+        # potential_files = sum([[path + "." + ext, path + ".preview." + ext, preview_path + "." + ext, preview_path + ".preview." + ext] for ext in preview_extensions], [])
+
+        potential_files = sum([[path + "." + ext, path + ".preview." + ext] for ext in preview_extensions], [])
+
+        for file in potential_files:
+            if os.path.isfile(file):
+                return self.link_preview(file)
 
         for file in potential_files:
             if os.path.isfile(file):
