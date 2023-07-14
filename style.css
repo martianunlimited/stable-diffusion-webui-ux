@@ -2919,6 +2919,15 @@ label.svelte-1qxcj04.svelte-1qxcj04.svelte-1qxcj04 {
 /*************/
 /* settings  */
 /*************/
+#audio_notification{
+  visibility:hidden !important;
+  height:0 !important;
+}
+
+input[type=checkbox]:checked {
+  background-color: var(--ae-primary-color) !important;
+}
+
 #row_setting_quicksettings_list,
 #row_setting_gradio_theme,
 #row_setting_hidden_tabs
@@ -3940,6 +3949,7 @@ div[data-testid="image"] canvas {
   height: 100%;
   width: 100%;
 }
+
 
 [id^="spotlight"] .autofit {
   object-fit: none;
