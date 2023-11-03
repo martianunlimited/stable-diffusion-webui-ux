@@ -21,7 +21,6 @@ device = None
 
 weight_load_location = None
 
-<<<<<<< HEAD
 if os.environ.get('IGNORE_CMD_ARGS_ERRORS', None) is None:
     cmd_opts = parser.parse_args()
 else:
@@ -71,9 +70,6 @@ batch_cond_uncond = cmd_opts.always_batch_cond_uncond or not (cmd_opts.lowvram o
 parallel_processing_allowed = not cmd_opts.lowvram and not cmd_opts.medvram
 xformers_available = False 
 config_filename = cmd_opts.ui_settings_file
-=======
-xformers_available = False
->>>>>>> f1ff0702143161714ff133d48b09ca39ba82d12d
 
 hypernetworks = {}
 
