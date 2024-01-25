@@ -3337,6 +3337,15 @@ input[type="checkbox"] {
 .default-mobile .template > .full-height {
     padding: var(--ae-panel-padding);
 }
+.tabitem > .gap{
+    overflow:hidden;
+}
+.pointer-events-none{
+    pointer-events: none;
+}
+.pointer-events-none button{
+    pointer-events: all;
+}
 
 @media (max-width: 768px) {
     .xtabs-tab span {
