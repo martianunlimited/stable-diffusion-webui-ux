@@ -21,7 +21,55 @@ device = None
 
 weight_load_location = None
 
-xformers_available = False
+if os.environ.get('IGNORE_CMD_ARGS_ERRORS', None) is None:
+    cmd_opts = parser.parse_args()
+else:
+    cmd_opts, _ = parser.parse_known_args()
+
+
+restricted_opts = {
+    "samples_filename_pattern",
+    "directories_filename_pattern",
+    "outdir_samples",
+    "outdir_txt2img_samples",
+    "outdir_img2img_samples",
+    "outdir_extras_samples",
+    "outdir_grids",
+    "outdir_txt2img_grids",
+    "outdir_save",
+    "outdir_init_images"
+}
+
+# https://huggingface.co/datasets/freddyaboulton/gradio-theme-subdomains/resolve/main/subdomains.json
+gradio_hf_hub_themes = [
+    "gradio/glass",
+    "gradio/monochrome",
+    "gradio/seafoam",
+    "gradio/soft",
+    "freddyaboulton/dracula_revamped",
+    "gradio/dracula_test",
+    "abidlabs/dracula_test",
+    "abidlabs/pakistan",
+    "dawood/microsoft_windows",
+    "ysharma/steampunk"
+]
+
+
+cmd_opts.disable_extension_access = (cmd_opts.share or cmd_opts.listen or cmd_opts.server_name) and not cmd_opts.enable_insecure_extension_access
+
+devices.device, devices.device_interrogate, devices.device_gfpgan, devices.device_esrgan, devices.device_codeformer = \
+    (devices.cpu if any(y in cmd_opts.use_cpu for y in [x, 'all']) else devices.get_optimal_device() for x in ['sd', 'interrogate', 'gfpgan', 'esrgan', 'codeformer'])
+
+devices.dtype = torch.float32 if cmd_opts.no_half else torch.float16
+devices.dtype_vae = torch.float32 if cmd_opts.no_half or cmd_opts.no_half_vae else torch.float16
+
+device = devices.device
+weight_load_location = None if cmd_opts.lowram else "cpu"
+
+batch_cond_uncond = cmd_opts.always_batch_cond_uncond or not (cmd_opts.lowvram or cmd_opts.medvram)
+parallel_processing_allowed = not cmd_opts.lowvram and not cmd_opts.medvram
+xformers_available = False 
+config_filename = cmd_opts.ui_settings_file
 
 hypernetworks = {}
 

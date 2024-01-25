@@ -76,3 +76,4 @@ This page allows you to add some settings to the main interface of txt2img and i
 }))
 
 
+
