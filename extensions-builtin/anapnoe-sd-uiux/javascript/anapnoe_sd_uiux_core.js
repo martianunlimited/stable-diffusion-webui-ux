@@ -608,6 +608,56 @@ function onUiUxReady(content_div){
             
             
             localStorage.setItem('UiUxComplete', true);
+
+			//controlnet copy alpha mask for inpaint
+			//not needed any more but i will use this in img2img inpaint roundtrip
+			/*
+			function copyCanvas(sourceId, destId) {
+
+				let sourceImage = document.querySelector(sourceId);
+				let destCanvas = document.querySelector(destId);
+
+				let destContext = destCanvas.getContext("2d");
+				
+				destContext.clearRect(0, 0, destCanvas.width, destCanvas.height);
+				destContext.drawImage(sourceImage, 0, 0, destCanvas.width, destCanvas.height);
+				
+				let imageData = destContext.getImageData(0, 0, destCanvas.width, destCanvas.height);
+				let data = imageData.data;
+				
+				for (var i = 0; i < data.length; i += 4) {
+					var alpha = data[i + 3];
+					data[i] = 255;
+					data[i + 1] = 255;
+					data[i + 2] = 255;
+					data[i + 3] = alpha;
+				}
+				
+				destContext.putImageData(imageData, 0, 0);
+			}
+
+			window.addEventListener("keydown", function(event) {
+				if (event.key === "0") {
+					let source = "#txt2img_controlnet_ControlNet-0_input_image img";
+					let dest = "#txt2img_controlnet_ControlNet-0_input_image canvas[key=mask]";
+					if(source && dest){
+						copyCanvas(source, dest);
+						console.log("copy to canvas inpaint");
+					}
+				}
+
+				if (event.key === "9") {
+					let source = "#img2img_controlnet_ControlNet-0_input_image img";
+					let dest = "#img2img_controlnet_ControlNet-0_input_image canvas[key=mask]";
+					if(source && dest){
+						copyCanvas(source, dest);
+						console.log("copy to canvas inpaint");
+					}
+				}
+			
+			
+			});
+			*/
 			
 		}
 	}, 500); 
@@ -1153,6 +1203,188 @@ function setupOnLoadResources() {
 	script.src = 'https://unpkg.com/split.js/dist/split.js';
 
 	content_div.appendChild(script);
+
+	const iibframe = document.querySelector("#infinite_image_browsing_container_wrapper > iframe");
+	if(iibframe){
+		var css = document.querySelector('[rel="stylesheet"][href*="user"]');
+		var rootRules = Array.from(css.sheet.cssRules).filter(function(cssRule) {
+			return (cssRule instanceof CSSStyleRule && cssRule.selectorText === ":root");
+		});
+		var rootCssText = rootRules[0].cssText; 
+
+		iibframe.addEventListener("load", ev => {
+			const new_style_element = document.createElement("style");
+			//getComputedStyle(document.documentElement).getPropertyValue('--my-variable-name');
+			new_style_element.textContent = 
+			`
+			${rootCssText}
+			:root body {
+				--zp-primary: var(--ae-primary-color)!important;
+				--zp-secondary: var(--ae-secondary-color)!important;
+				--zp-tertiary: var(--ae-secondary-color)!important;
+				--zp-primary-background: var(--ae-panel-bg-color)!important;
+				--zp-secondary-background: var(--ae-panel-bg-color)!important;
+				--zp-secondary-variant-background: var(--ae-input-bg-color)!important;
+				--zp-tertiary-background: var(--ae-input-bg-color)!important;
+				--zp-border: var(--ae-input-border-color)!important;
+				--zp-icon-bg: var(--ae-primary-color)!important;
+			}
+			#zanllp_dev_gradio_fe .ant-tabs-tabpane > .container .header + .ant-alert,
+			#zanllp_dev_gradio_fe .ant-tabs-tabpane > .container .header{
+				/*display:none!important;*/
+			}
+			#zanllp_dev_gradio_fe .ant-tabs-tabpane > .container .ant-radio-group{
+				display:none!important;
+			}
+
+			#zanllp_dev_gradio_fe .file.grid,{
+				border-radius:var(--ae-input-border-radius)!important;
+				margin:0 !important;
+			}
+			#zanllp_dev_gradio_fe .file.grid .ant-image, .file.grid .preview-icon-wrap {
+				border-radius: var(--ae-border-radius);
+				border: var(--ae-input-border-size) solid var(--ae-input-border-color);
+				background-color: var(--ae-input-bg-color);
+				border:0;
+			}
+
+			.ant-image-preview-wrap {
+				background-color: var(--ae-main-bg-color) !important;
+			}
+
+			#zanllp_dev_gradio_fe .view .file-list,
+			#zanllp_dev_gradio_fe .view {
+				padding: 0;
+			}
+
+			#zanllp_dev_gradio_fe .file.grid {
+				margin: 2px;
+				border-radius: var(--ae-border-radius);
+				background-color: var(--ae-input-bg-color) !important;
+				padding: 4px;
+				border: var(--ae-input-border-size) solid var(--ae-input-border-color);
+			}
+
+			#zanllp_dev_gradio_fe .location-bar {
+				padding: 5px;
+				border-bottom: 0;
+			}
+
+			#zanllp_dev_gradio_fe a {
+				color: var(--ae-primary-color);
+			}
+
+			#zanllp_dev_gradio_fe .file.selected{
+				outline: 2px solid var(--ae-primary-color);
+			}
+
+			li.file.grid .ant-image, li.file.grid .preview-icon-wrap {
+				border: 0 !important;
+				border-radius:0 !important;
+			}
+			.file.grid .preview-icon-wrap {
+				margin-bottom:6px !important;
+			}
+			.ant-dropdown-menu {
+				background-color: var(--ae-input-bg-color) !important;
+				
+			}
+			.ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title {
+				color: var(--ae-input-text-color) !important;
+			}
+			.ant-dropdown-menu-item:hover, .ant-dropdown-menu-submenu-title:hover {
+				background-color: var(--ae-primary-color) !important;
+				color: var(--ae-input-hover-text-color) !important;
+			}
+			.ant-btn:hover, .ant-btn:focus {
+				color: var(--ae-input-hover-text-color) !important;
+				border-color: transparent !important;
+				background: var(--ae-primary-color) !important;
+			}
+
+			.ant-menu-item-divider {
+				border-color: var(--ae-input-border-color) !important;
+			}
+			.ant-tabs {
+				color: var(--ae-label-color) !important;
+			}
+			body ::-webkit-scrollbar-thumb:hover {
+				background-color: var(--ae-primary-color) !important;
+			}
+			.ant-btn,
+			.ant-tabs-card>.ant-tabs-nav .ant-tabs-tab, .ant-tabs-card>div>.ant-tabs-nav .ant-tabs-tab {
+				border-radius: var(--ae-border-radius) !important;
+				background-color: var(--ae-input-bg-color) !important;
+				border: var(--ae-input-border-size) solid var(--ae-input-border-color) !important;
+				color: var(--ae-primary-color) !important;
+			}
+
+			.ant-tabs-card>.ant-tabs-nav .ant-tabs-tab-active, 
+			.ant-tabs-card>div>.ant-tabs-nav .ant-tabs-tab-active
+			{			
+				background-color: var(--ae-primary-color) !important;	
+				color: var(--ae-input-hover-text-color) !important;
+			}
+
+			.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+				color: var(--ae-primary-color) !important;		
+				text-shadow: 0 0 .25px  var(--ae-primary-color) !important;
+			}
+			.ant-tabs-ink-bar {
+				background: var(--ae-primary-color) !important;
+			}
+			.ant-tabs-tab:hover,
+			.ant-tabs-tab-btn:focus, .ant-tabs-tab-remove:focus, 
+			.ant-tabs-tab-btn:active, .ant-tabs-tab-remove:active {
+				color: var(--ae-primary-color) !important;
+			}
+
+			.ant-tabs-tab.ant-tabs-tab-with-remove.ant-tabs-tab-active .ant-tabs-tab-btn {
+				color: var(--ae-input-hover-text-color) !important;		
+			}
+
+			.ant-tabs>.ant-tabs-nav .ant-tabs-nav-add, .ant-tabs>div>.ant-tabs-nav .ant-tabs-nav-add {
+				border-radius: var(--ae-border-radius) !important;
+				background-color: var(--ae-input-bg-color) !important;
+				border: var(--ae-input-border-size) solid var(--ae-input-border-color) !important;
+				color: var(--ae-primary-color) !important;
+			}
+
+			.ant-tabs-top>.ant-tabs-nav:before, 
+			.ant-tabs-bottom>.ant-tabs-nav:before, 
+			.ant-tabs-top>div>.ant-tabs-nav:before, 
+			.ant-tabs-bottom>div>.ant-tabs-nav:before {
+				border-bottom: var(--ae-input-border-size) solid var(--ae-input-border-color) !important;
+			}
+			.feature-item .item:hover {
+				color: var(--ae-primary-color) !important;
+			}
+			.preview-switch>* {
+				color: var(--ae-primary-color) !important;
+				font-size: 2em !important;
+			}
+			.feature-item {
+				border-radius: var(--ae-border-radius) !important;
+				background-color: var(--ae-input-bg-color) !important;
+				border: var(--ae-input-border-size) solid var(--ae-input-border-color) !important;
+			}
+			.content{
+				grid-gap: var(--ae-gap-size) !important;
+				margin: var(--ae-gap-size) !important;
+				margin-left: 0 !important;
+			}
+			.container{
+				padding:0!important;
+			}
+			h1, h2, h3, h4, h5, h6 {
+				color: var(--ae-label-color) !important;
+			}
+
+			
+			`;
+			ev.target.contentDocument.head.appendChild(new_style_element);
+		});
+	}
 
 }
 

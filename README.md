@@ -25,6 +25,11 @@ The workspaces extension empowers you to create customized views and organize th
 
 [Become a supporter and get early access to Workspaces for UI-UX.](https://buymeacoffee.com/dayanbayah)
 
+## Infinite image browsing integration
+Seamless integration with the [Infinite image browsing](https://github.com/zanllp/sd-webui-infinite-image-browsing) extension.
+
+![InfiniteImageBrowserIntegration](https://github.com/anapnoe/stable-diffusion-webui-ux/assets/124302297/f9048ff4-0d78-4227-8b3f-5a282d24e5cb)
+
 ## Todo
 - Improve Mobile Support
 - Fullscreen Gallery Support
